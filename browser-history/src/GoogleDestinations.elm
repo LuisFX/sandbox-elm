@@ -13,8 +13,8 @@
 
 module GoogleDestinations exposing
     ( GoogleDestinations
-    , googleDestinationsToString
-    , googleDestinations
+    -- , googleDestinationsToString
+    , googleDestinationsDecoder
     , Row
     , Element
     , Distance
@@ -22,9 +22,10 @@ module GoogleDestinations exposing
 
 import Json.Decode as Jdec
 import Json.Decode.Pipeline as Jpipe
-import Json.Encode as Jenc
+-- import Json.Encode as Jenc
 import Dict exposing (Dict, map, toList)
 import List exposing (map)
+import Json.Decode exposing (succeed)
 
 type alias GoogleDestinations =
     { destinationAddresses : List String
@@ -50,77 +51,77 @@ type alias Distance =
 
 -- decoders and encoders
 
-googleDestinationsToString : GoogleDestinations -> String
-googleDestinationsToString r = Jenc.encode 0 (encodeGoogleDestinations r)
+-- googleDestinationsToString : GoogleDestinations -> String
+-- googleDestinationsToString r = Jenc.encode 0 (encodeGoogleDestinations r)
 
-googleDestinations : Jdec.Decoder GoogleDestinations
-googleDestinations =
-    Jpipe.decode GoogleDestinations
+googleDestinationsDecoder : Jdec.Decoder GoogleDestinations
+googleDestinationsDecoder =
+    succeed GoogleDestinations
         |> Jpipe.required "destination_addresses" (Jdec.list Jdec.string)
         |> Jpipe.required "origin_addresses" (Jdec.list Jdec.string)
         |> Jpipe.required "rows" (Jdec.list row)
         |> Jpipe.required "status" Jdec.string
 
-encodeGoogleDestinations : GoogleDestinations -> Jenc.Value
-encodeGoogleDestinations x =
-    Jenc.object
-        [ ("destination_addresses", makeListEncoder Jenc.string x.destinationAddresses)
-        , ("origin_addresses", makeListEncoder Jenc.string x.originAddresses)
-        , ("rows", makeListEncoder encodeRow x.rows)
-        , ("status", Jenc.string x.status)
-        ]
+-- encodeGoogleDestinations : GoogleDestinations -> Jenc.Value
+-- encodeGoogleDestinations x =
+--     Jenc.object
+--         [ ("destination_addresses", makeListEncoder Jenc.string x.destinationAddresses)
+--         , ("origin_addresses", makeListEncoder Jenc.string x.originAddresses)
+--         , ("rows", makeListEncoder encodeRow x.rows)
+--         , ("status", Jenc.string x.status)
+--         ]
 
 row : Jdec.Decoder Row
 row =
-    Jpipe.decode Row
+    succeed Row
         |> Jpipe.required "elements" (Jdec.list element)
 
-encodeRow : Row -> Jenc.Value
-encodeRow x =
-    Jenc.object
-        [ ("elements", makeListEncoder encodeElement x.elements)
-        ]
+-- encodeRow : Row -> Jenc.Value
+-- encodeRow x =
+--     Jenc.object
+--         [ ("elements", makeListEncoder encodeElement x.elements)
+--         ]
 
 element : Jdec.Decoder Element
 element =
-    Jpipe.decode Element
+    succeed Element
         |> Jpipe.required "distance" distance
         |> Jpipe.required "duration" distance
         |> Jpipe.required "status" Jdec.string
 
-encodeElement : Element -> Jenc.Value
-encodeElement x =
-    Jenc.object
-        [ ("distance", encodeDistance x.distance)
-        , ("duration", encodeDistance x.duration)
-        , ("status", Jenc.string x.status)
-        ]
+-- encodeElement : Element -> Jenc.Value
+-- encodeElement x =
+--     Jenc.object
+--         [ ("distance", encodeDistance x.distance)
+--         , ("duration", encodeDistance x.duration)
+--         , ("status", Jenc.string x.status)
+--         ]
 
 distance : Jdec.Decoder Distance
 distance =
-    Jpipe.decode Distance
+    succeed Distance
         |> Jpipe.required "text" Jdec.string
         |> Jpipe.required "value" Jdec.int
 
-encodeDistance : Distance -> Jenc.Value
-encodeDistance x =
-    Jenc.object
-        [ ("text", Jenc.string x.text)
-        , ("value", Jenc.int x.value)
-        ]
+-- encodeDistance : Distance -> Jenc.Value
+-- encodeDistance x =
+--     Jenc.object
+--         [ ("text", Jenc.string x.text)
+--         , ("value", Jenc.int x.value)
+--         ]
 
 --- encoder helpers
 
-makeListEncoder : (a -> Jenc.Value) -> List a -> Jenc.Value
-makeListEncoder f arr =
-    Jenc.list (List.map f arr)
+-- makeListEncoder : (a -> Jenc.Value) -> List a -> Jenc.Value
+-- makeListEncoder f arr =
+--     Jenc.list (List.map f arr)
 
-makeDictEncoder : (a -> Jenc.Value) -> Dict String a -> Jenc.Value
-makeDictEncoder f dict =
-    Jenc.object (toList (Dict.map (\k -> f) dict))
+-- makeDictEncoder : (a -> Jenc.Value) -> Dict String a -> Jenc.Value
+-- makeDictEncoder f dict =
+--     Jenc.object (toList (Dict.map (\k -> f) dict))
 
-makeNullableEncoder : (a -> Jenc.Value) -> Maybe a -> Jenc.Value
-makeNullableEncoder f m =
-    case m of
-    Just x -> f x
-    Nothing -> Jenc.null
+-- makeNullableEncoder : (a -> Jenc.Value) -> Maybe a -> Jenc.Value
+-- makeNullableEncoder f m =
+--     case m of
+--     Just x -> f x
+--     Nothing -> Jenc.null

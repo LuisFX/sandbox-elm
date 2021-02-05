@@ -5338,8 +5338,8 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$Loading = {$: 'Loading'};
-var $author$project$Main$ReceivedHistoryItems = function (a) {
-	return {$: 'ReceivedHistoryItems', a: a};
+var $author$project$Main$ReceivedGoogleDestinations = function (a) {
+	return {$: 'ReceivedGoogleDestinations', a: a};
 };
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
@@ -6128,10 +6128,11 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
-var $author$project$HistoryItem$HistoryItem = F2(
-	function (title, url) {
-		return {title: title, url: url};
+var $author$project$GoogleDestinations$GoogleDestinations = F4(
+	function (destinationAddresses, originAddresses, rows, status) {
+		return {destinationAddresses: destinationAddresses, originAddresses: originAddresses, rows: rows, status: status};
 	});
+var $elm$json$Json$Decode$list = _Json_decodeList;
 var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
@@ -6141,7 +6142,89 @@ var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
 			A2($elm$json$Json$Decode$field, key, valDecoder),
 			decoder);
 	});
+var $author$project$GoogleDestinations$Row = function (elements) {
+	return {elements: elements};
+};
+var $author$project$GoogleDestinations$Element = F3(
+	function (distance, duration, status) {
+		return {distance: distance, duration: duration, status: status};
+	});
+var $author$project$GoogleDestinations$Distance = F2(
+	function (text, value) {
+		return {text: text, value: value};
+	});
+var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$GoogleDestinations$distance = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'value',
+	$elm$json$Json$Decode$int,
+	A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'text',
+		$elm$json$Json$Decode$string,
+		$elm$json$Json$Decode$succeed($author$project$GoogleDestinations$Distance)));
+var $author$project$GoogleDestinations$element = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'status',
+	$elm$json$Json$Decode$string,
+	A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'duration',
+		$author$project$GoogleDestinations$distance,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'distance',
+			$author$project$GoogleDestinations$distance,
+			$elm$json$Json$Decode$succeed($author$project$GoogleDestinations$Element))));
+var $author$project$GoogleDestinations$row = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'elements',
+	$elm$json$Json$Decode$list($author$project$GoogleDestinations$element),
+	$elm$json$Json$Decode$succeed($author$project$GoogleDestinations$Row));
+var $author$project$GoogleDestinations$googleDestinationsDecoder = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'status',
+	$elm$json$Json$Decode$string,
+	A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'rows',
+		$elm$json$Json$Decode$list($author$project$GoogleDestinations$row),
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'origin_addresses',
+			$elm$json$Json$Decode$list($elm$json$Json$Decode$string),
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'destination_addresses',
+				$elm$json$Json$Decode$list($elm$json$Json$Decode$string),
+				$elm$json$Json$Decode$succeed($author$project$GoogleDestinations$GoogleDestinations)))));
+var $author$project$Main$getGoogleDestinations = $elm$http$Http$get(
+	{
+		expect: A2($elm$http$Http$expectJson, $author$project$Main$ReceivedGoogleDestinations, $author$project$GoogleDestinations$googleDestinationsDecoder),
+		url: 'http://localhost:8000/google.maps.json'
+	});
+var $author$project$Main$init = function (_v0) {
+	return _Utils_Tuple2($author$project$Main$Loading, $author$project$Main$getGoogleDestinations);
+};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$ErrorLoading = function (a) {
+	return {$: 'ErrorLoading', a: a};
+};
+var $author$project$Main$GoogleDestinationsLoaded = function (a) {
+	return {$: 'GoogleDestinationsLoaded', a: a};
+};
+var $author$project$Main$HistoryItemsLoaded = function (a) {
+	return {$: 'HistoryItemsLoaded', a: a};
+};
+var $author$project$Main$ReceivedHistoryItems = function (a) {
+	return {$: 'ReceivedHistoryItems', a: a};
+};
+var $author$project$HistoryItem$HistoryItem = F2(
+	function (title, url) {
+		return {title: title, url: url};
+	});
 var $author$project$HistoryItem$historyItemDecoder = A3(
 	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'url',
@@ -6151,58 +6234,66 @@ var $author$project$HistoryItem$historyItemDecoder = A3(
 		'title',
 		$elm$json$Json$Decode$string,
 		$elm$json$Json$Decode$succeed($author$project$HistoryItem$HistoryItem)));
-var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$HistoryItem$historyItemsDecoder = $elm$json$Json$Decode$list($author$project$HistoryItem$historyItemDecoder);
 var $author$project$Main$getHistoryItems = $elm$http$Http$get(
 	{
 		expect: A2($elm$http$Http$expectJson, $author$project$Main$ReceivedHistoryItems, $author$project$HistoryItem$historyItemsDecoder),
 		url: 'http://localhost:8001/BrowserHistory'
 	});
-var $author$project$Main$init = function (_v0) {
-	return _Utils_Tuple2($author$project$Main$Loading, $author$project$Main$getHistoryItems);
-};
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$ErrorLoading = function (a) {
-	return {$: 'ErrorLoading', a: a};
-};
-var $author$project$Main$HistoryItemsLoaded = function (a) {
-	return {$: 'HistoryItemsLoaded', a: a};
+var $author$project$Main$getHttpErrorString = function (error) {
+	switch (error.$) {
+		case 'BadUrl':
+			var s = error.a;
+			return 'BAD_URL:' + s;
+		case 'Timeout':
+			return 'TIMEOUT';
+		case 'NetworkError':
+			return 'NETWORK_ERROR';
+		case 'BadStatus':
+			var i = error.a;
+			return 'BAD_STATUS: ' + $elm$core$String$fromInt(i);
+		default:
+			var s = error.a;
+			return 'BAD_BODY: ' + s;
+	}
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var result = msg.a;
-		if (result.$ === 'Ok') {
-			var hi = result.a;
-			return _Utils_Tuple2(
-				$author$project$Main$HistoryItemsLoaded(hi),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			var e = result.a;
-			return function (error) {
-				return _Utils_Tuple2(
-					$author$project$Main$ErrorLoading(error),
-					$elm$core$Platform$Cmd$none);
-			}(
-				function () {
-					switch (e.$) {
-						case 'BadUrl':
-							var s = e.a;
-							return 'BAD_URL:' + s;
-						case 'Timeout':
-							return 'TIMEOUT';
-						case 'NetworkError':
-							return 'NETWORK_ERROR';
-						case 'BadStatus':
-							var i = e.a;
-							return 'BAD_STATUS: ' + $elm$core$String$fromInt(i);
-						default:
-							var s = e.a;
-							return 'BAD_BODY: ' + s;
-					}
-				}());
+		switch (msg.$) {
+			case 'FetchHistoryItems':
+				return _Utils_Tuple2($author$project$Main$Loading, $author$project$Main$getHistoryItems);
+			case 'FetchGoogleDestinations':
+				return _Utils_Tuple2($author$project$Main$Loading, $author$project$Main$getGoogleDestinations);
+			case 'ReceivedGoogleDestinations':
+				var result = msg.a;
+				if (result.$ === 'Ok') {
+					var payload = result.a;
+					return _Utils_Tuple2(
+						$author$project$Main$GoogleDestinationsLoaded(payload),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var e = result.a;
+					return _Utils_Tuple2(
+						$author$project$Main$ErrorLoading(
+							$author$project$Main$getHttpErrorString(e)),
+						$elm$core$Platform$Cmd$none);
+				}
+			default:
+				var result = msg.a;
+				if (result.$ === 'Ok') {
+					var payload = result.a;
+					return _Utils_Tuple2(
+						$author$project$Main$HistoryItemsLoaded(payload),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var e = result.a;
+					return _Utils_Tuple2(
+						$author$project$Main$ErrorLoading(
+							$author$project$Main$getHttpErrorString(e)),
+						$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $elm$html$Html$div = _VirtualDom_node('div');
@@ -6211,6 +6302,59 @@ var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Main$FetchHistoryItems = {$: 'FetchHistoryItems'};
+var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $author$project$Main$viewGoogleDestinations = function (dest) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$Main$FetchHistoryItems)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Switch To History Items')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				A2(
+					$elm$core$List$map,
+					function (d) {
+						return A2(
+							$elm$html$Html$span,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text(d)
+								]));
+					},
+					dest.destinationAddresses))
+			]));
+};
+var $author$project$Main$FetchGoogleDestinations = {$: 'FetchGoogleDestinations'};
 var $elm$html$Html$h3 = _VirtualDom_node('h3');
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$html$Html$ul = _VirtualDom_node('ul');
@@ -6221,26 +6365,42 @@ var $author$project$Main$viewHistoryItems = function (historyItems) {
 		_List_fromArray(
 			[
 				A2(
-				$elm$html$Html$ul,
-				_List_Nil,
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick($author$project$Main$FetchGoogleDestinations)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Switch To Google Destinations')
+					])),
 				A2(
-					$elm$core$List$map,
-					function (i) {
-						return A2(
-							$elm$html$Html$li,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$h3,
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$ul,
+						_List_Nil,
+						A2(
+							$elm$core$List$map,
+							function (i) {
+								return A2(
+									$elm$html$Html$li,
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text(i.title)
-										]))
-								]));
-					},
-					historyItems))
+											A2(
+											$elm$html$Html$h3,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$elm$html$Html$text(i.title)
+												]))
+										]));
+							},
+							historyItems))
+					]))
 			]));
 };
 var $author$project$Main$view = function (model) {
@@ -6275,9 +6435,12 @@ var $author$project$Main$view = function (model) {
 								[
 									$elm$html$Html$text(e)
 								]));
-					default:
+					case 'HistoryItemsLoaded':
 						var hi = model.a;
 						return $author$project$Main$viewHistoryItems(hi);
+					default:
+						var destinations = model.a;
+						return $author$project$Main$viewGoogleDestinations(destinations);
 				}
 			}()
 			]));
